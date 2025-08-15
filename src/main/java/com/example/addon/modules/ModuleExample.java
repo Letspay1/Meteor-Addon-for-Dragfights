@@ -10,9 +10,14 @@ import meteordevelopment.meteorclient.settings.SettingGroup;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.utils.render.color.Color;
 import meteordevelopment.meteorclient.utils.render.color.SettingColor;
+import meteordevelopment.meteorclient.utils.player.PlayerUtils;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
+import net.minecraft.util.math.MathHelper;
+import net.minecraft.entity.Entity;
+import meteordevelopment.meteorclient.events.world.TickEvent;
+import meteordevelopment.meteorclient.utils.player.InvUtils;
 
 public class DetectionSwap extends Module {
     private final SettingGroup sgGeneral = this.settings.getDefaultGroup();
@@ -35,7 +40,7 @@ public class DetectionSwap extends Module {
 
     private final Setting<Integer> bowSlot = sgGeneral.add(new IntSetting.Builder()
         .name("bow-slot")
-        .description("The hotbar slot which your bow is in.")
+        .description("The hotbar slot which your bow is in -1.")
         .defaultValue(0)
         .min(0)
         .sliderMax(8)
@@ -44,7 +49,7 @@ public class DetectionSwap extends Module {
 
     private final Setting<Integer> swordSlot = sgGeneral.add(new IntSetting.Builder()
         .name("sword-slot")
-        .description("The hotbar slot which your sword is in.")
+        .description("The hotbar slot which your sword is in -1.")
         .defaultValue(0)
         .min(0)
         .sliderMax(8)
@@ -65,16 +70,24 @@ public class DetectionSwap extends Module {
      * Requires {@link AddonTemplate#getPackage()} to be setup correctly, otherwise the game will crash whenever the module is enabled.
      */
     @EventHandler
-    private void onRender3d(Render3DEvent event) {
-        // Create & stretch the marker object
-        Box marker = new Box(BlockPos.ORIGIN);
-        marker = marker.stretch(
-            scale.get() * marker.getLengthX(),
-            scale.get() * marker.getLengthY(),
-            scale.get() * marker.getLengthZ()
-        );
-
-        // Render the marker based on the color setting
-        event.renderer.box(marker, color.get(), color.get(), ShapeMode.Both, 0);
+    private void onTick(TickEvent.Pre event) {
+        // Entity range detection
+        private boolean entityCheck(Entity entity) {
+            
+            Box hitbox = entity.getBoundingBox();
+            if (!PlayerUtils.isWithin(
+                    MathHelper.clamp(mc.player.getX(), hitbox.minX, hitbox.maxX),
+                    MathHelper.clamp(mc.player.getY(), hitbox.minY, hitbox.maxY),
+                    MathHelper.clamp(mc.player.getZ(), hitbox.minZ, hitbox.maxZ),
+                    range.get()
+                )) {
+                // Within range, switch to sword
+                InvUtils.swap(swordSlot.get(), false)
+            } else {
+                // Not within range, switch to bow
+                InvUtils.swap(bowSlot.get(), false)
+            }
+            
+            }
     }
 }
