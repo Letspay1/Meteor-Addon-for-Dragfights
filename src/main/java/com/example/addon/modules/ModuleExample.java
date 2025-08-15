@@ -14,7 +14,7 @@ import meteordevelopment.orbit.EventHandler;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
 
-public class ModuleExample extends Module {
+public class DetectionSwap extends Module {
     private final SettingGroup sgGeneral = this.settings.getDefaultGroup();
     private final SettingGroup sgRender = this.settings.createGroup("Render");
 
@@ -24,26 +24,40 @@ public class ModuleExample extends Module {
      * If you want to access the setting from another class, simply make the setting {@code public}, and use
      * {@link meteordevelopment.meteorclient.systems.modules.Modules#get(Class)} to access the {@link Module} object.
      */
-    private final Setting<Double> scale = sgGeneral.add(new DoubleSetting.Builder()
-        .name("scale")
-        .description("The size of the marker.")
-        .defaultValue(2.0d)
-        .range(0.5d, 10.0d)
+    private final Setting<Double> range = sgGeneral.add(new DoubleSetting.Builder()
+        .name("range")
+        .description("The range which entities are detected in.")
+        .defaultValue(3)
+        .min(0)
+        .sliderMax(3)
         .build()
     );
 
-    private final Setting<SettingColor> color = sgRender.add(new ColorSetting.Builder()
-        .name("color")
-        .description("The color of the marker.")
-        .defaultValue(Color.MAGENTA)
+    private final Setting<Integer> bowSlot = sgGeneral.add(new IntSetting.Builder()
+        .name("bow-slot")
+        .description("The hotbar slot which your bow is in.")
+        .defaultValue(0)
+        .min(0)
+        .sliderMax(8)
         .build()
     );
+
+    private final Setting<Integer> swordSlot = sgGeneral.add(new IntSetting.Builder()
+        .name("sword-slot")
+        .description("The hotbar slot which your sword is in.")
+        .defaultValue(0)
+        .min(0)
+        .sliderMax(8)
+        .build()
+    );
+
+    
 
     /**
      * The {@code name} parameter should be in kebab-case.
      */
-    public ModuleExample() {
-        super(AddonTemplate.CATEGORY, "world-origin", "An example module that highlights the center of the world.");
+    public DetectionSwap() {
+        super(AddonTemplate.CATEGORY, "detection-swap", "An example module that highlights the center of the world.");
     }
 
     /**
