@@ -72,22 +72,25 @@ public class DetectionSwap extends Module {
     @EventHandler
     private void onTick(TickEvent.Pre event) {
         // Entity range detection
-        private boolean entityCheck(Entity entity) {
-            
-            Box hitbox = entity.getBoundingBox();
-            if (!PlayerUtils.isWithin(
-                    MathHelper.clamp(mc.player.getX(), hitbox.minX, hitbox.maxX),
-                    MathHelper.clamp(mc.player.getY(), hitbox.minY, hitbox.maxY),
-                    MathHelper.clamp(mc.player.getZ(), hitbox.minZ, hitbox.maxZ),
-                    range.get()
-                )) {
-                // Within range, switch to sword
-                InvUtils.swap(swordSlot.get(), false)
-            } else {
-                // Not within range, switch to bow
-                InvUtils.swap(bowSlot.get(), false)
+        for (Entity entity : mc.world.getEntities()) {
+            if (isWithinRange(entity)) {
+                // Within range, swap to sword
+                InvUtils.swap(swordSlot.get(), false);
+                return;
             }
-            
-            }
+        }
+
+        // Not within range, swap to bow
+        InvUtils.swap(bowSlot.get(), false);
+    }
+
+    private boolean isWithinRange(Entity entity) {
+        Box hitbox = entity.getBoundingBox();
+
+        double clampedX = MathHelper.clamp(mc.player.getX(), hitbox.minX, hitbox.maxX);
+        double clampedY = MathHelper.clamp(mc.player.getY(), hitbox.minY, hitbox.maxY);
+        double clampedZ = MathHelper.clamp(mc.player.getZ(), hitbox.minZ, hitbox.maxZ);
+
+        return PlayerUtils.isWithin(clampedX, clampedY, clampedZ, range.get());
     }
 }
